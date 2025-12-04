@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="icon/favicon.ico" />
+    <title>Studio de Filtros (Effect Photo)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+
+    <div id="app" class="p-4 sm:p-8 max-w-6xl mx-auto">
+        <!-- Encabezado -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-blue-700">Studio de Filtros</h1>
+            <p class="text-gray-500 mt-2">Plataforma para aplicar filtros de procesamiento de imagen modularmente.</p>
+        </header>
+
+        <!-- Contenedor Principal -->
+        <main class="lg:flex lg:space-x-10">
+
+            <!-- Panel de Control -->
+            <div class="lg:w-1/3 bg-white p-6 rounded-xl container-shadow mb-6 lg:mb-0 h-fit sticky top-8 border border-gray-100">
+                
+                <h2 class="text-2xl font-bold mb-5 text-gray-800">Controles de Imagen</h2>
+
+                <!-- Carga de Imagen -->
+                <div class="mb-6 pb-4 border-b">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">1. Cargar Archivo</label>
+                    <input type="file" @change="handleImageUpload" accept="image/*"
+                           class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer transition duration-150">
+                </div>
+
+                <!-- Controles del Filtro (Solo visibles si hay imagen cargada) -->
+                <div v-if="imageElement">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">2. Parámetros del Filtro</h3>
+                    
+                    <!-- Selector de Filtros -->
+                    <div class="mb-6">
+                         <label for="filter-select" class="block text-sm font-semibold text-gray-700 mb-2">Seleccionar Efecto</label>
+                         <select id="filter-select" v-model="selectedFilter" @change="applyFilter"
+                                 class="w-full p-2 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500">
+                             <option value="xerox">Xerox Bi-Color</option>
+                             <option value="duotone" disabled>Doble Luz (Duotono) - Próximamente</option>
+                             <option value="posterize" disabled>Mapa de Bits (Posterización) - Próximamente</option>
+                         </select>
+                    </div>
+
+                    <!-- Parámetros específicos del Filtro Xerox -->
+                    <div v-if="selectedFilter === 'xerox'">
+                        <p class="text-sm text-gray-500 mb-3">Estás en el modo Xerox (binarización).</p>
+                        
+                        <!-- Colores -->
+                        <div class="flex space-x-4 mb-4">
+                            <!-- Color 1: Claro -->
+                            <div class="flex-1">
+                                <label for="color1" class="text-sm font-medium text-gray-700 block mb-1">Color Claro</label>
+                                <input type="color" id="color1" v-model="color1" @change="applyFilter" class="w-full h-10 p-1 rounded-md border-2 border-gray-300 cursor-pointer">
+                                <span class="text-xs text-gray-500 block text-center mt-1">{{ color1 }}</span>
+                            </div>
+                            <!-- Color 2: Oscuro -->
+                            <div class="flex-1">
+                                <label for="color2" class="text-sm font-medium text-gray-700 block mb-1">Color Oscuro</label>
+                                <input type="color" id="color2" v-model="color2" @change="applyFilter" class="w-full h-10 p-1 rounded-md border-2 border-gray-300 cursor-pointer">
+                                <span class="text-xs text-gray-500 block text-center mt-1">{{ color2 }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider de Umbral -->
+                        <div class="mb-6 pt-4 border-t">
+                            <label for="threshold" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Umbral de Brillo: <span class="font-bold text-blue-600">{{ threshold }}</span>
+                            </label>
+                            <input type="range" id="threshold" min="0" max="255" v-model.number="threshold" @input="applyFilter"
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg transition duration-150">
+                            <p class="text-xs text-gray-400 mt-1">El punto de corte entre Color Claro y Oscuro.</p>
+                        </div>
+
+                        <!-- Control de Ruido Mediano -->
+                        <div class="mb-6">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" v-model="useMedianFilter" @change="applyFilter" class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                                <span class="ml-2 text-sm font-semibold text-gray-700">Añadir Ruido (Filtro Mediana)</span>
+                            </label>
+                            <p class="text-xs text-gray-400 mt-1">Suaviza los detalles, creando un efecto de impresión "sucia" o difusa.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón de Descarga -->
+                    <button @click="downloadImage"
+                            :disabled="!isProcessed"
+                            class="w-full py-3 px-4 bg-green-600 text-white font-bold rounded-lg container-shadow hover:bg-green-700 transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <span v-if="!isProcessed">Procesando...</span>
+                        <span v-else>Descargar Imagen Filtrada</span>
+                    </button>
+                </div>
+
+                <!-- Mensaje sin Imagen -->
+                <div v-else class="text-center p-6 bg-blue-50 rounded-lg text-blue-700 border border-blue-200">
+                    <p class="font-medium">Sube una imagen para empezar a aplicar filtros.</p>
+                </div>
+
+            </div>
+
+            <!-- Previsualización y Canvas (Derecha) -->
+            <div class="lg:w-2/3 bg-white p-6 rounded-xl container-shadow flex flex-col items-center border border-gray-100">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Previsualización del Efecto</h2>
+
+                <!-- Canvas de Salida-->
+                <div v-if="imageElement" class="w-full flex justify-center">
+                    <canvas id="outputCanvas" ref="outputCanvas" 
+                            :width="canvasWidth" :height="canvasHeight" 
+                            class="transition duration-500 ease-in-out">
+                    </canvas>
+                </div>
+                
+                <!-- Placeholder mientras no hay imagen -->
+                <div v-else class="text-center p-20 border-4 border-dashed border-gray-200 rounded-lg w-full max-w-lg">
+                    <p class="text-lg text-gray-400">El resultado se cargará aquí.</p>
+                </div>
+                <p v-if="isLoading" class="mt-4 text-blue-600 font-bold animate-pulse">Aplicando filtro...</p>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+         <br><br>
+        <footer class="p-4 sm:p-8 max-w-6xl mx-auto text-indigo-500 bg-white p-6 rounded-xl container-shadow mb-6 lg:mb-0 h-fit sticky top-8 border border-gray-100">
+                <p>Studio de Filtros (Effect Photo) &copy; 2025</p>
+                <p>Carlos Solis with assistance from Google Gemini</p>
+                <p class="text-xs mt-1 pb-4">Licencia del Código: GNU AGPL v3.0</p>
+        </footer>
+
+    </div>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
