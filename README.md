@@ -1,4 +1,4 @@
-# Studio de Filtros de Impresión (Print Filter Studio)
+# Studio de Filtros (Effect Photo)
 
 ## Descripción del Proyecto
 
