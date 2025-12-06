@@ -2,7 +2,7 @@
 
 ## Descripción del Proyecto
 
-Esta aplicación web es una herramienta de procesamiento de imágenes diseñada para simular efectos de impresión y copiado, como los que se encuentran en fotocopiadoras antiguas o técnicas de diseño gráfico bi-color. Utiliza la potencia del HTML Canvas y JavaScript para aplicar transformaciones de píxeles en tiempo real.
+Esta aplicación web es una herramienta de procesamiento de imágenes diseñada para simular efectos. Utiliza la potencia del HTML Canvas y JavaScript para aplicar transformaciones de píxeles en tiempo real.
 El proyecto está estructurado de forma modular utilizando Vue.js (CDN) para la interfaz de usuario y Tailwind CSS para un diseño limpio y responsivo.
 
 ## Estructura de Archivos
