@@ -19,10 +19,15 @@ Este es el filtro principal implementado actualmente. Permite al usuario reducir
 - Color Claro: El color que reemplazará a los píxeles más brillantes que el Umbral.
 - Color Oscuro: El color que reemplazará a los píxeles más oscuros que el Umbral.
 - Umbral de Brillo: El punto de corte (0-255) para decidir qué píxeles son claros y cuáles son oscuros.
+- Ruido por Filtro de Mediana (Median Filter) Para lograr un efecto más auténtico de fotocopiadora "sucia" o impresión difusa, se ha implementado opcionalmente un Filtro de Mediana (Kernel 3x3). Efecto: Al aplicarse, simula la difusión de la tinta y la pérdida de detalle granular, dando ese aspecto orgánico y menos digital a la imagen final.
 
-2. Ruido por Filtro de Mediana (Median Filter)
-Para lograr un efecto más auténtico de fotocopiadora "sucia" o impresión difusa, se ha implementado opcionalmente un Filtro de Mediana (Kernel 3x3).
-Efecto: Al aplicarse, simula la difusión de la tinta y la pérdida de detalle granular, dando ese aspecto orgánico y menos digital a la imagen final.
+2. Filtro de Doble Luz (Duotono Neón)
+Este filtro simula un esquema de iluminación de estudio profesional, donde se proyectan dos fuentes de luz de distintos colores desde ángulos opuestos. A diferencia de la binarización, este efecto conserva la textura, el volumen y la profundidad de la imagen original, transformándola en una pieza estética.
+- Colores de Iluminación (Color A y B): Define los dos tonos cromáticos que bañarán la escena.
+- Ángulo del Degradado: Permite rotar la dirección de las "luces" en un rango de 0° a 360°.
+- Exposición Base (Ajuste de Luminancia): Antes de aplicar el color, el filtro procesa la imagen en escalas de grises. Este parámetro permite "empujar" la luz de la foto original; una exposición alta rescatará detalles en sombras, mientras que una baja hará que los colores se concentren solo en los brillos más intensos.
+- Intensidad Neón (Brillo de Color): Actúa como un multiplicador de saturación y brillo para los pigmentos seleccionados. Al aumentar este valor, los colores "explotan" sobre la imagen, simulando la incandescencia de una lámpara de neón o un foco LED de alta potencia.
+- Lógica Técnica: El efecto convierte cada píxel a luminancia ITU-R BT.709, aplica una corrección de contraste mediante una curva Gamma, y finalmente realiza una mezcla aditiva entre el degradado espacial y la luminosidad de la imagen, asegurando que las zonas negras de la foto original se mantengan profundas para dar realismo.
 
 ## Módulos Clave en app.js
 El archivo de lógica está dividido en tres objetos principales para mantener la modularidad:
@@ -31,7 +36,4 @@ El archivo de lógica está dividido en tres objetos principales para mantener l
 - Componente Vue: Gestiona el estado de la aplicación (imagen cargada, parámetros del filtro, estado de carga) y se encarga de llamar al Filters adecuado a través del método applyFilter.
 
 ## Próximas Adiciones
-
-- Implementación del filtro Doble Luz (Duotono).
 - Implementación del filtro Mapa de Bits (Posterización).
-- Opción para cambiar el tamaño del kernel del Filtro de Mediana.
