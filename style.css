@@ -19,3 +19,13 @@ body {
     height: auto;
     background-color: #fff;
 }
+
+/* Animación para el Toast */
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+    opacity: 0;
+    transform: translate(-50%, 20px); /* Aparece desde abajo */
+}

@@ -88,6 +88,13 @@ const ImageUtils = {
             }
         }
         return tempImageData;
+    },
+
+    /**
+     * Realiza una interpolación lineal entre dos valores.
+     */
+    lerp(a, b, t) {
+        return a + (b - a) * t;
     }
 };
 
@@ -141,6 +148,58 @@ const Filters = {
         }
         return currentImageData;
     },
+
+    /**
+     * Aplica el filtro Duotone (Doble Luz).
+     * @param {ImageData} imageData 
+     * @param {Object} params 
+     */
+    duotone(imageData, params) {
+        const { width, height, data } = imageData;
+        const rgb1 = ImageUtils.hexToRgb(params.color1);
+        const rgb2 = ImageUtils.hexToRgb(params.color2);
+        
+        const angleRad = (params.angle * Math.PI) / 180;
+        const dirX = Math.cos(angleRad);
+        const dirY = Math.sin(angleRad);
+        
+        const exposure = params.exposure || 1.0;
+        const intensity = params.neonIntensity || 1.0;
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const i = (y * width + x) * 4;
+
+                // 1. Obtener Luminancia base
+                const gray = ImageUtils.calculateLuminance(data[i], data[i+1], data[i+2]);
+                
+                // 2. APLICAR EXPOSICIÓN Y CONTRASTE
+                // Multiplicamos por la exposición para rescatar luces o sombras
+                let normGray = (gray / 255) * exposure;
+                
+                // Aplicamos un ligero contraste (curva S simplificada) para que no sea plano
+                normGray = Math.pow(normGray, 1.2); 
+                
+                // Limitar a 1.0 máximo
+                if (normGray > 1) normGray = 1;
+
+                // 3. Calcular factor de degradado (donde cae cada color)
+                let factor = (x / width - 0.5) * dirX + (y / height - 0.5) * dirY;
+                factor = Math.max(0, Math.min(1, factor + 0.5));
+
+                // 4. Mezcla de los dos colores elegidos
+                const rMix = rgb1[0] * (1 - factor) + rgb2[0] * factor;
+                const gMix = rgb1[1] * (1 - factor) + rgb2[1] * factor;
+                const bMix = rgb1[2] * (1 - factor) + rgb2[2] * factor;
+
+                // 5. Resultado final: Color Mezclado * Luminancia Ajustada * Intensidad
+                data[i]     = Math.min(255, rMix * normGray * intensity);
+                data[i + 1] = Math.min(255, gMix * normGray * intensity);
+                data[i + 2] = Math.min(255, bMix * normGray * intensity);
+            }
+        }
+        return imageData;
+    }
     
     // Futuros Filtros se añadirían aquí (duotone, posterize, etc.)
 };
@@ -154,9 +213,14 @@ document.addEventListener('DOMContentLoaded', () => {
         data() {
             return {
                 imageElement: null,     // Referencia al objeto Image cargado
-                // Parámetros del filtro Xerox
+                //parametros duo tono
+                exposure: 1.0,
+                gradientAngle: 45,
+                neonIntensity: 1.5,
+                //parametros default
                 color1: '#ffffff',      
-                color2: '#000000',      
+                color2: '#000000', 
+                // Parámetros del filtro Xerox     
                 threshold: 128,
                 useMedianFilter: false, // NUEVO: Control para activar el filtro de mediana
                 // Control de la UI
@@ -165,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 canvasHeight: 0,
                 isLoading: false,
                 isProcessed: false,
+                showToast: false, //visibilidad toast
             }
         },
         methods: {
@@ -228,6 +293,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             color2: this.color2,
                             threshold: this.threshold,
                             useMedian: this.useMedianFilter, // NUEVO: Añadir parámetro de filtro de mediana
+                            exposure: this.exposure,
+                            angle: this.gradientAngle, // duotono
+                            neonIntensity: this.neonIntensity,
                         };
                         
                         // El filtro modifica los datos
@@ -262,6 +330,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                // --- Lógica del Toast ---
+                this.showToast = true;
+
+                // Ocultar automáticamente después de 3 segundos
+                setTimeout(() => {
+                    this.showToast = false;
+                }, 3000);
             }
         }
     }).mount('#app');
