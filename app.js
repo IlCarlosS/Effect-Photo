@@ -199,6 +199,43 @@ const Filters = {
             }
         }
         return imageData;
+    },
+
+    posterize(imageData, params) {
+        const { width, height, data } = imageData;
+        const size = params.pixelSize || 1;
+        const palette = params.palette.map(hex => ImageUtils.hexToRgb(hex));
+        const levels = palette.length;
+
+        // Recorremos la imagen en saltos según el tamaño del píxel
+        for (let y = 0; y < height; y += size) {
+            for (let x = 0; x < width; x += size) {
+                
+                // 1. Tomamos el píxel superior izquierdo del bloque como color representativo
+                const i = (y * width + x) * 4;
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+
+                // 2. Calculamos su luminosidad para saber en qué nivel de la paleta cae
+                const luminance = ImageUtils.calculateLuminance(r, g, b);
+                
+                // Mapeamos 0-255 a un índice de la paleta (0 a levels-1)
+                const paletteIndex = Math.floor((luminance / 256) * levels);
+                const finalColor = palette[paletteIndex];
+
+                // 3. Pintamos TODO el bloque (size x size) con ese color
+                for (let blockY = 0; blockY < size && (y + blockY) < height; blockY++) {
+                    for (let blockX = 0; blockX < size && (x + blockX) < width; blockX++) {
+                        const pixelIdx = ((y + blockY) * width + (x + blockX)) * 4;
+                        data[pixelIdx]     = finalColor[0];
+                        data[pixelIdx + 1] = finalColor[1];
+                        data[pixelIdx + 2] = finalColor[2];
+                    }
+                }
+            }
+        }
+        return imageData;
     }
     
     // Futuros Filtros se añadirían aquí (duotone, posterize, etc.)
@@ -223,6 +260,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Parámetros del filtro Xerox     
                 threshold: 128,
                 useMedianFilter: false, // NUEVO: Control para activar el filtro de mediana
+                // parametros filtro posterizacion
+                pixelSize: 4,
+                currentPalette: ['#081820', '#346856', '#88c070', '#e0f8d0'], // Game Boy por defecto
                 // Control de la UI
                 selectedFilter: 'xerox',// Filtro actualmente seleccionado
                 canvasWidth: 0,
@@ -230,7 +270,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 isLoading: false,
                 isProcessed: false,
                 showToast: false, //visibilidad toast
+                //funciones moviles
+                isFullscreen: false, 
+                fullScreenImage: null, // Guardará la captura del canvas para el modal
+                //modo oscuro
+                isDarkMode: false,
             }
+        },
+        mounted() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                this.isDarkMode = true;
+                document.body.classList.add('dark-mode');
+            } else {
+                this.isDarkMode = false;
+                document.body.classList.remove('dark-mode');
+            }
+
+            this.initTheme();
+            // Escuchar cambios del sistema en tiempo real
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                // Solo aplicar automáticamente si el usuario no ha forzado un tema manualmente
+                if (!localStorage.getItem('theme')) {
+                    this.applyTheme(e.matches);
+                }
+            });
         },
         methods: {
             /**
@@ -296,6 +360,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             exposure: this.exposure,
                             angle: this.gradientAngle, // duotono
                             neonIntensity: this.neonIntensity,
+                            pixelSize: this.pixelSize,
+                            palette: this.currentPalette
                         };
                         
                         // El filtro modifica los datos
@@ -337,7 +403,65 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     this.showToast = false;
                 }, 3000);
-            }
+            },
+
+            setPalette(type) {
+                const palettes = {
+                    'gameboy': ['#081820', '#346856', '#88c070', '#e0f8d0'],
+                    'amber': ['#000000', '#552200', '#aa4400', '#ffb200'],
+                    'monochrome': ['#1a1a1a', '#545454', '#a6a6a6', '#ffffff'],
+                    'phosphor': ['#000000', '#003300', '#009900', '#33ff33'],
+                    'gblight': ['#003830', '#00625a', '#048c80', '#c8f0e8'],
+                };
+                this.currentPalette = palettes[type];
+                this.applyFilter();
+            },
+            
+            /** 
+             * Boton de previsualizacion pantalla completa en vistas moviles
+            */
+            openFullscreen() {
+            const canvas = this.$refs.outputCanvas;
+            this.fullScreenImage = canvas.toDataURL('image/png');
+            this.isFullscreen = true;
+            // Bloquear el scroll del cuerpo para mejor UX
+            document.body.style.overflow = 'hidden';
+            },
+            closeFullscreen() {
+                this.isFullscreen = false;
+                document.body.style.overflow = 'auto';
+            },
+
+            /**
+            * modo oscuro
+            */
+            initTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+                if (savedTheme) {
+                    this.applyTheme(savedTheme === 'dark');
+                } else {
+                    // Si no hay guardado (caso móvil), seguimos al sistema
+                    this.applyTheme(systemPrefersDark);
+                }
+            },
+
+            toggleDarkMode() {
+                this.isDarkMode = !this.isDarkMode;
+                this.applyTheme(this.isDarkMode);
+                // Guardamos la elección manual
+                localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+            },
+
+            applyTheme(dark) {
+                this.isDarkMode = dark;
+                if (dark) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            },
         }
     }).mount('#app');
 });

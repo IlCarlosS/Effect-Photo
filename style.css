@@ -17,7 +17,7 @@ body {
     border-radius: 0.75rem;
     max-width: 100%;
     height: auto;
-    background-color: #fff;
+    background-color: #f4f4f7;
 }
 
 /* Animación para el Toast */
@@ -28,4 +28,86 @@ body {
 .fade-enter-from, .fade-leave-to {
     opacity: 0;
     transform: translate(-50%, 20px); /* Aparece desde abajo */
+}
+
+#outputCanvas {
+    border: 2px solid #3b82f6;
+    border-radius: 0.75rem;
+    /* Asegura que el canvas nunca sea más ancho que su contenedor */
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    background-color: #f4f4f7;
+    /* Evita saltos visuales mientras carga */
+    display: block;
+}
+
+/* Animación específica para el modal */
+.fade-enter-active, .fade-leave-active {
+    transition: all 0.3s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+}
+
+.fade-enter-to, .fade-leave-from {
+    opacity: 1;
+    backdrop-filter: blur(10px); /* Opcional: difumina el fondo */
+}
+
+/*modo oscuro*/
+/* Colores base */
+body.dark-mode {
+    background-color: #0f172a !important; /* Slate 900 */
+    color: #141414;
+}
+
+/* Sobrescribir contenedores blancos de Tailwind */
+body.dark-mode .bg-white {
+    background-color: #1e293b !important; /* Slate 800 */
+    border-color: #334155 !important; /* Slate 700 */
+}
+
+/* Sobrescribir textos oscuros */
+body.dark-mode .text-gray-800,
+body.dark-mode .text-gray-700,
+body.dark-mode h1,
+body.dark-mode h2 {
+    color: #f1f5f9 !important;
+}
+
+/* Sobrescribir textos secundarios */
+body.dark-mode .text-gray-500,
+body.dark-mode .text-gray-400 {
+    color: #94a3b8 !important;
+}
+
+/* Ajustar sombras para que no se vean blancas/extrañas */
+body.dark-mode .container-shadow {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+/* El Canvas y las imágenes NO SE TOCAN, así mantienen sus colores reales */
+body.dark-mode canvas {
+    border-color: #3b82f6 !important;
+    background-color: #1e293b;
+}
+
+/* Ajuste para inputs y selects */
+body.dark-mode select, 
+body.dark-mode input[type="range"] {
+    background-color: #334155;
+    color: white;
+}
+
+/* Asegurar que el modal de pantalla completa sea siempre oscuro o siga el tema */
+body.dark-mode .fixed.inset-0.bg-black {
+    background-color: #020617; /* Un negro más profundo para el modal en modo oscuro */
+}
+
+/* Evitar que el botón de cerrar del modal se pierda */
+body.dark-mode .bg-white\/20 {
+    background-color: rgba(255, 255, 255, 0.1);
 }
