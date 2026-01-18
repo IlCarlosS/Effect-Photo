@@ -29,11 +29,28 @@ Este filtro simula un esquema de iluminación de estudio profesional, donde se p
 - Intensidad Neón (Brillo de Color): Actúa como un multiplicador de saturación y brillo para los pigmentos seleccionados. Al aumentar este valor, los colores "explotan" sobre la imagen, simulando la incandescencia de una lámpara de neón o un foco LED de alta potencia.
 - Lógica Técnica: El efecto convierte cada píxel a luminancia ITU-R BT.709, aplica una corrección de contraste mediante una curva Gamma, y finalmente realiza una mezcla aditiva entre el degradado espacial y la luminosidad de la imagen, asegurando que las zonas negras de la foto original se mantengan profundas para dar realismo.
 
+3. Filtro Mapa de Bits (Retro Console)
+Este filtro transforma la imagen en una representación de arte de píxeles (Pixel Art) de 2 bits, emulando las limitaciones técnicas de las consolas y monitores de los años 80 y 90. Pixelación Espacial: Permite reducir la resolución aparente de la imagen mediante el agrupamiento de píxeles en bloques, creando un efecto de mosaico. Cuantización de Color: La luminosidad de la imagen se segmenta en 4 niveles, mapeándolos a paletas cromáticas históricas:
+- GB Clásica: Tonos oliva originales de la primera consola portátil.
+- GB Light: Un esquema azulado/turquesa suave con mayor contraste.
+- Monitor Ámbar: Emulación de terminales industriales de fósforo ámbar.
+- Fósforo Verde: Estilo retro-computacional clásico (Terminal/Matrix).
+
+## Optimización UI/UX y Mobile-First
+Se ha rediseñado la interfaz para garantizar una experiencia fluida en cualquier dispositivo, aplicando principios de diseño adaptativo avanzado:
+- Layout Responsivo Inteligente: En dispositivos móviles, el orden de la interfaz se invierte (flex-col-reverse), posicionando la previsualización del canvas en la parte superior. Esto permite que el usuario vea los cambios en tiempo real mientras ajusta los controles inferiores sin necesidad de hacer scroll.
+- Modo Pantalla Completa (Mobile): Debido a las limitaciones de espacio en smartphones, se implementó un modal de visualización expandida. Este convierte el canvas en una imagen nativa, permitiendo gestos de "Pinch-to-Zoom" y una inspección detallada antes de la exportación.
+- Feedback Visual (Toast Notifications): Sistema de notificaciones emergentes para confirmar acciones críticas, como la descarga exitosa del archivo, mejorando la certeza del usuario sobre el estado de la aplicación.
+- Controles Dinámicos: El panel de configuración utiliza un comportamiento sticky condicional (solo en escritorio) para mantener los parámetros siempre al alcance mientras se navega por la galería de resultados.
+
+## Gestión de Temas (Modo Oscuro)
+La aplicación ahora integra un sistema de gestión de apariencia inteligente:
+- Detección Automática: El sistema consulta la preferencia global del sistema operativo (prefers-color-scheme) para adaptarse automáticamente al modo claro u oscuro desde el primer acceso.
+- Persistencia de Datos: Se utiliza localStorage para recordar la preferencia manual del usuario, asegurando que la configuración se mantenga tras recargar la página.
+- Protección de Contenido Visual: A diferencia de los métodos de inversión global, el modo oscuro de Studio de Filtros utiliza una sobrescritura selectiva de clases. Esto garantiza que el Canvas y las imágenes procesadas mantengan sus colores originales y no se vean alteradas por el cambio de tema de la interfaz.
+
 ## Módulos Clave en app.js
 El archivo de lógica está dividido en tres objetos principales para mantener la modularidad:
 - ImageUtils: Contiene funciones matemáticas para la manipulación de color y píxeles, incluyendo hexToRgb, calculateLuminance y el applyMedianFilter.
 - Filters: Un objeto que actúa como un mapa, donde cada clave es el nombre de un filtro (ej: xerox). Cada función de filtro toma imageData y params y devuelve los datos modificados.
 - Componente Vue: Gestiona el estado de la aplicación (imagen cargada, parámetros del filtro, estado de carga) y se encarga de llamar al Filters adecuado a través del método applyFilter.
-
-## Próximas Adiciones
-- Implementación del filtro Mapa de Bits (Posterización).
