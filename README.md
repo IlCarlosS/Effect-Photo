@@ -8,20 +8,20 @@ El proyecto está estructurado de forma modular utilizando Vue.js (CDN) para la 
 ## Estructura de Archivos
 
 La aplicación sigue una arquitectura modular simple para separar la presentación, el estilo y la lógica:
-- index.html: Contiene la estructura principal de la interfaz de usuario y carga las dependencias (style.css, Vue, Tailwind y app.js).
-- style.css: Aloja todos los estilos CSS personalizados que complementan a Tailwind CSS.
-- app.js: Contiene toda la lógica de la aplicación Vue, las utilidades de imagen y las implementaciones de los filtros de píxeles.
+- **index.html:** Contiene la estructura principal de la interfaz de usuario y carga las dependencias (style.css, Vue, Tailwind y app.js).
+- **style.css:** Aloja todos los estilos CSS personalizados que complementan a Tailwind CSS.
+- **app.js:** Contiene toda la lógica de la aplicación Vue, las utilidades de imagen y las implementaciones de los filtros de píxeles.
 
 ## Características Implementadas
 
-1. Filtro Xerox Bi-Color (Binarización)
+1. **Filtro Xerox Bi-Color (Binarización)**
 Este es el filtro principal implementado actualmente. Permite al usuario reducir la paleta de colores de la imagen a solo dos tonos (Color Claro y Color Oscuro) basándose en un umbral de luminosidad.
 - Color Claro: El color que reemplazará a los píxeles más brillantes que el Umbral.
 - Color Oscuro: El color que reemplazará a los píxeles más oscuros que el Umbral.
 - Umbral de Brillo: El punto de corte (0-255) para decidir qué píxeles son claros y cuáles son oscuros.
 - Ruido por Filtro de Mediana (Median Filter) Para lograr un efecto más auténtico de fotocopiadora "sucia" o impresión difusa, se ha implementado opcionalmente un Filtro de Mediana (Kernel 3x3). Efecto: Al aplicarse, simula la difusión de la tinta y la pérdida de detalle granular, dando ese aspecto orgánico y menos digital a la imagen final.
 
-2. Filtro de Doble Luz (Duotono Neón)
+2. **Filtro de Doble Luz (Duotono Neón)**
 Este filtro simula un esquema de iluminación de estudio profesional, donde se proyectan dos fuentes de luz de distintos colores desde ángulos opuestos. A diferencia de la binarización, este efecto conserva la textura, el volumen y la profundidad de la imagen original, transformándola en una pieza estética.
 - Colores de Iluminación (Color A y B): Define los dos tonos cromáticos que bañarán la escena.
 - Ángulo del Degradado: Permite rotar la dirección de las "luces" en un rango de 0° a 360°.
@@ -29,7 +29,7 @@ Este filtro simula un esquema de iluminación de estudio profesional, donde se p
 - Intensidad Neón (Brillo de Color): Actúa como un multiplicador de saturación y brillo para los pigmentos seleccionados. Al aumentar este valor, los colores "explotan" sobre la imagen, simulando la incandescencia de una lámpara de neón o un foco LED de alta potencia.
 - Lógica Técnica: El efecto convierte cada píxel a luminancia ITU-R BT.709, aplica una corrección de contraste mediante una curva Gamma, y finalmente realiza una mezcla aditiva entre el degradado espacial y la luminosidad de la imagen, asegurando que las zonas negras de la foto original se mantengan profundas para dar realismo.
 
-3. Filtro Mapa de Bits (Retro Console)
+3. **Filtro Mapa de Bits (Retro Console)**
 Este filtro transforma la imagen en una representación de arte de píxeles (Pixel Art) de 2 bits, emulando las limitaciones técnicas de las consolas y monitores de los años 80 y 90. Pixelación Espacial: Permite reducir la resolución aparente de la imagen mediante el agrupamiento de píxeles en bloques, creando un efecto de mosaico. Cuantización de Color: La luminosidad de la imagen se segmenta en 4 niveles, mapeándolos a paletas cromáticas históricas:
 - GB Clásica: Tonos oliva originales de la primera consola portátil.
 - GB Light: Un esquema azulado/turquesa suave con mayor contraste.
